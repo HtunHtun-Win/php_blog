@@ -1,8 +1,12 @@
 <?php
   session_start();
   require '../config/config.php';
+  $role = $_SESSION['user_role'];
   //check session
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
+    header('location: /admin/login.php');
+  }elseif ($role != 1) {
+    $_SESSION['user_level'] = 'user';
     header('location: /admin/login.php');
   }
 ?>

@@ -1,26 +1,28 @@
 <?php
   session_start();
-	require '../config/config.php';
+	require 'config/config.php';
 	if($_POST){
+    $name = $_POST['name'];
 		$email = $_POST['email'];
 		$password = $_POST['password'];
     try{
+      //check duplicate
       $sql = "SELECT * FROM users where email='$email'";
       $pdostatement = $pdo->prepare($sql);
       $pdostatement->execute();
       $result = $pdostatement->fetch();
-      if ($result['email']){
-        if ($result['password'] == $password) {
-          $_SESSION['user_id'] = $result['id'];
-          $_SESSION['user_name'] = $result['name'];
-          $_SESSION['user_role'] = $result['role'];
-          $_SESSION['logged_in'] = time();
-          header('location: index.php');
-        }else{
-          echo "<script>alert('Email or password is incorrect!')</script>";
-        }
+      //
+      if ($result['email']) {
+        $_SESSION['error'] = "error";
       }else{
-        echo "<script>alert('Email or password is incorrect!')</script>";
+        $sql = "INSERT INTO users(name,password,email,role) VALUES(:name,:password,:email,0)";
+        $pdostatement = $pdo->prepare($sql);
+        $pdostatement->execute([
+          ':name' => $name,
+          ':password' => $password,
+          ':email' => $email,
+        ]);
+        echo "<script>alert('Account creaded successfully.');window.location.href='index.php'</script>";
       }
     }catch(Exception $e){
       echo $e->getMessage();
@@ -38,34 +40,41 @@
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <!-- Font Awesome -->
-  <link rel="stylesheet" href="../plugins/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <!-- icheck bootstrap -->
-  <link rel="stylesheet" href="../plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+  <link rel="stylesheet" href="plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <!-- Theme style -->
-  <link rel="stylesheet" href="../dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="dist/css/adminlte.min.css">
 </head>
 <body class="hold-transition login-page">
 <div class="login-box">
   <div class="login-logo">
     <a href="#"><b>Blog</b>Admin</a>
   </div>
-  <!-- /.login-logo -->
-  <?php if($_SESSION['user_level']): ?>
+  <?php if($_SESSION['error']): ?>
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-      <strong>Warning!</strong> You don't have access to see admin page!
+      <strong>Warning!</strong> Your Email has been used!
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-  <?php session_destroy(); endif;?>
-  <!-- Alert Box -->
+  <?php endif; unset($_SESSION['error'])?>
+  <!-- /.login-logo -->
   <div class="card">
     <div class="card-body login-card-body">
-      <p class="login-box-msg">Sign in to start your session</p>
+      <p class="login-box-msg">Create New Account</p>
 
-      <form action="login.php" method="post">
+      <form action="register.php" method="post">
         <div class="input-group mb-3">
-          <input type="email" name="email" class="form-control" placeholder="Email" >
+          <input type="text" name="name" class="form-control" placeholder="Name" required>
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-user"></span>
+            </div>
+          </div>
+        </div>
+        <div class="input-group mb-3">
+          <input type="email" name="email" class="form-control" placeholder="Email" required>
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-envelope"></span>
@@ -73,7 +82,7 @@
           </div>
         </div>
         <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" >
+          <input type="password" name="password" class="form-control" placeholder="Password" required>
           <div class="input-group-append">
             <div class="input-group-text">
               <span class="fas fa-lock"></span>
@@ -81,12 +90,14 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-4">
-            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          <div class="container">
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+            <a type="submit" class="btn btn-success btn-block" href="login.php">Login</a>
           </div>
           <!-- /.col -->
         </div>
       </form>
+
       <!-- <p class="mb-0">
         <a href="register.html" class="text-center">Register a new membership</a>
       </p> -->
@@ -97,10 +108,10 @@
 <!-- /.login-box -->
 
 <!-- jQuery -->
-<script src="../plugins/jquery/jquery.min.js"></script>
+<script src="plugins/jquery/jquery.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
-<script src="../dist/js/adminlte.min.js"></script>
+<script src="dist/js/adminlte.min.js"></script>
 </body>
 </html>

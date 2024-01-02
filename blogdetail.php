@@ -1,3 +1,16 @@
+<?php
+  session_start();
+  require 'config/config.php';
+  //check session
+  if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
+    header('location: login.php');
+  }
+  $id = $_GET['detail'];
+  $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE id=$id");
+  $pdostatement->execute();
+  $data = $pdostatement->fetch();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +26,11 @@
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
+  <style type="text/css">
+    body{
+      margin: 0px 500px;
+    }
+  </style>
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="">
@@ -22,7 +40,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <div class="container-fluid">
-        <h2 class="text-center">Blog Site</h2>
+        <h2 class="text-center"><?php echo $data['title'] ?></h2>
       </div><!-- /.container-fluid -->
     </section>
 
@@ -42,37 +60,17 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <img class="img-fluid pad" src="../dist/img/photo2.png" width="100%" alt="Photo">
+                <img class="img-fluid pad" src="<?php echo $data['image'] ?>" width="100%" alt="Photo">
 
-                <p>I took this photo this morning. What do you guys think?</p>
-                <button type="button" class="btn btn-default btn-sm"><i class="fas fa-share"></i> Share</button>
-                <button type="button" class="btn btn-default btn-sm"><i class="far fa-thumbs-up"></i> Like</button>
-                <span class="float-right text-muted">127 likes - 3 comments</span>
+                <p><?php echo $data['content'] ?></p>
               </div>
               <!-- /.card-body -->
               <div class="card-footer card-comments">
                 <div class="card-comment">
-                  <!-- User image -->
-                  <img class="img-circle img-sm" src="../dist/img/user3-128x128.jpg" alt="User Image">
-
+                  <h4 class="text-primary">Comment</h4>
                   <div class="comment-text">
                     <span class="username">
                       Maria Gonzales
-                      <span class="text-muted float-right">8:03 PM Today</span>
-                    </span><!-- /.username -->
-                    It is a long established fact that a reader will be distracted
-                    by the readable content of a page when looking at its layout.
-                  </div>
-                  <!-- /.comment-text -->
-                </div>
-                <!-- /.card-comment -->
-                <div class="card-comment">
-                  <!-- User image -->
-                  <img class="img-circle img-sm" src="../dist/img/user4-128x128.jpg" alt="User Image">
-
-                  <div class="comment-text">
-                    <span class="username">
-                      Luna Stark
                       <span class="text-muted float-right">8:03 PM Today</span>
                     </span><!-- /.username -->
                     It is a long established fact that a reader will be distracted

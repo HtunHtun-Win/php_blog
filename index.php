@@ -35,52 +35,35 @@
       </div><!-- /.container-fluid -->
     </section>
 
+    <?php 
+      $pdostatement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+      $pdostatement->execute();
+      $results = $pdostatement->fetchAll();
+    ?>
     <!-- Main content -->
     <section class="content">
       <div class="row">
+        <?php foreach($results as $result): ?>
           <div class="col-md-4">
             <!-- Box Comment -->
             <div class="card card-widget">
               <div class="card-header">
-                <h4 class="text-center">Blog Title</h4>
+                <h4 class="text-center"><?php echo $result['title'] ?></h4>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
+                <div class="text-center">
+                  <a href="blogdetail.php?detail=<?php echo $result['id'] ?>">
+                    <img class="img-fluid pad" src="<?php echo $result['image'] ?>" style="height: 200px;">
+                  </a>
+                </div>
               </div>
               <!-- /.card-body -->
             </div>
             <!-- /.card -->
           </div>
-          <div class="col-md-4">
-            <!-- Box Comment -->
-            <div class="card card-widget">
-              <div class="card-header">
-                <h4 class="text-center">Blog Title</h4>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-          <div class="col-md-4">
-            <!-- Box Comment -->
-            <div class="card card-widget">
-              <div class="card-header">
-                <h4 class="text-center">Blog Title</h4>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <img class="img-fluid pad" src="dist/img/photo2.png" alt="Photo">
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </div>
-        </div>
+        <?php endforeach; ?>
+      </div>
     </section>
     <!-- /.content -->
 
@@ -94,7 +77,7 @@
     <div class="float-right d-none d-sm-block">
       <b>Version</b> 3.2.0
     </div>
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2024 <a href="#">RobotSixteen</a>.</strong> All rights reserved.
   </footer>
 
   <!-- Control Sidebar -->

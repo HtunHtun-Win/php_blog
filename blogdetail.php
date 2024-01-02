@@ -5,10 +5,31 @@
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
     header('location: login.php');
   }
-  $id = $_GET['detail'];
-  $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE id=$id");
+  $post_id = $_GET['detail'];
+  $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE id=$post_id");
   $pdostatement->execute();
   $data = $pdostatement->fetch();
+
+  //add comment;
+  if ($_POST['comment']) {
+    $newComment = $_POST['comment'];
+    $cmt_sql = "INSERT INTO comments(content,author_id,post_id) VALUES(:content,:author_id,:post_id)";
+    $cmt_statement = $pdo->prepare($cmt_sql);
+    $cmt_statement->execute([
+      ':content' => $newComment,
+      ':author_id' => $_SESSION['user_id'],
+      ':post_id' => $post_id,
+    ]);
+  }
+
+  //get comments
+  $getCmtSql = "select comments.id,comments.content,comments.post_id,comments.created_at,users.name from comments left join users on comments.author_id=users.id where post_id=:post_id";
+  $get_cmt_stat = $pdo->prepare($getCmtSql);
+  $get_cmt_stat->execute([
+    ':post_id' => $post_id,
+  ]);
+  $comments = $get_cmt_stat->fetchAll();
+
 ?>
 
 <!DOCTYPE html>
@@ -27,7 +48,7 @@
   <!-- Theme style -->
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <style type="text/css">
-    body{
+    .content{
       margin: 0px 500px;
     }
   </style>
@@ -51,11 +72,10 @@
             <!-- Box Comment -->
             <div class="card card-widget">
               <div class="card-header">
-                <div class="user-block">
-                  <img class="img-circle" src="../dist/img/user1-128x128.jpg" alt="User Image">
-                  <span class="username"><a href="#">Jonathan Burke Jr.</a></span>
-                  <span class="description">Shared publicly - 7:30 PM Today</span>
-                </div>
+                <!-- <div class="user-block"> -->
+                  <strong><span class="username"><?php echo "Admin" ?></span></strong><br>
+                  <span class="description"><?php echo $data['created_at'] ?></span>
+                <!-- </div>  -->
                 <!-- /.user-block -->
               </div>
               <!-- /.card-header -->
@@ -65,28 +85,27 @@
                 <p><?php echo $data['content'] ?></p>
               </div>
               <!-- /.card-body -->
-              <div class="card-footer card-comments">
+              <div class="card-footer card-comments" >
                 <div class="card-comment">
                   <h4 class="text-primary">Comment</h4>
-                  <div class="comment-text">
-                    <span class="username">
-                      Maria Gonzales
-                      <span class="text-muted float-right">8:03 PM Today</span>
-                    </span><!-- /.username -->
-                    It is a long established fact that a reader will be distracted
-                    by the readable content of a page when looking at its layout.
-                  </div>
+                  <?php foreach($comments as $comment): ?>
+                    <div class="comment-text" style="margin-left: 0px;">
+                      <span class="username">
+                        <?php echo $comment['name'] ?>
+                        <span class="text-muted float-right"><?php echo $comment['created_at'] ?></span>
+                      </span><!-- /.username -->
+                      <?php echo $comment['content'] ?>
+                    </div>
+                  <?php endforeach; ?>
                   <!-- /.comment-text -->
                 </div>
                 <!-- /.card-comment -->
               </div>
               <!-- /.card-footer -->
               <div class="card-footer">
-                <form action="#" method="post">
-                  <img class="img-fluid img-circle img-sm" src="../dist/img/user4-128x128.jpg" alt="Alt Text">
-                  <!-- .img-push is used to add margin to elements next to floating images -->
+                <form action="blogdetail.php?detail=<?php echo $post_id ?>" method="post">
                   <div class="img-push">
-                    <input type="text" class="form-control form-control-sm" placeholder="Press enter to post comment">
+                    <input name="comment" type="text" class="form-control form-control-sm" placeholder="Press enter to post comment">
                   </div>
                 </form>
               </div>
@@ -106,9 +125,12 @@
 
   <footer class="main-footer" style="margin-left: 0px;">
     <div class="float-right d-none d-sm-block">
-      <b>Version</b> 3.2.0
+      <form action="logout.php">
+        <a class="btn btn-danger btn-sm" href="index.php">Home</a>
+        <button class="btn btn-danger btn-sm">Logout</button>
+      </form>
     </div>
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong> All rights reserved.
+    <strong>Copyright &copy; 2024 <a href="#">RobotSixteen</a>.</strong> All rights reserved.
   </footer>
 
   <!-- Control Sidebar -->

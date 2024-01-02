@@ -36,9 +36,39 @@
     </section>
 
     <?php 
-      $pdostatement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
-      $pdostatement->execute();
-      $results = $pdostatement->fetchAll();
+      // $pdostatement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+      // $pdostatement->execute();
+      // $results = $pdostatement->fetchAll();
+    if (!empty($_GET['pageno'])) {
+                  $pageno = $_GET['pageno'];
+                }else{
+                  $pageno = 1;
+                }
+                $numOfrecs = 6;
+                $offset = ($pageno-1)*$numOfrecs;
+                if (empty($_POST['search'])) {
+                  //Get Total Pagesr
+                  $pdostatement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+                  $pdostatement->execute();
+                  $rawresults = $pdostatement->fetchAll();
+                  $total_pages = ceil(count($rawresults)/$numOfrecs);
+                  //
+                  $pdostatement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC LIMIT $offset,$numOfrecs");
+                  $pdostatement->execute();
+                  $results = $pdostatement->fetchAll();
+                }else{
+                  $search = $_POST['search'];
+                  echo $search;
+                  //Get Total Pages
+                  $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE title LIKE '%$search%' ORDER BY id DESC");
+                  $pdostatement->execute();
+                  $rawresults = $pdostatement->fetchAll();
+                  $total_pages = ceil(count($rawresults)/$numOfrecs);
+                  //
+                  $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE title LIKE '%$search%' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+                  $pdostatement->execute();
+                  $results = $pdostatement->fetchAll();
+                }
     ?>
     <!-- Main content -->
     <section class="content">
@@ -63,19 +93,31 @@
             <!-- /.card -->
           </div>
         <?php endforeach; ?>
+        <div class="container-fluid">
+          <nav aria-label="Page navigation example" style="float:right;">
+            <ul class="pagination">
+              <li class="page-item"> <a class="page-link" href="?pageno=1">First</a> </li>
+              <li class="page-item <?php if($pageno<=1){echo 'disabled';} ?>">
+                <a class="page-link " href="?pageno=<?php echo $pageno-1; ?>">Previous</a>
+              </li>
+              <li class="page-item"> <a class="page-link" href="#"><?php echo $pageno; ?></a> </li>
+              <li class="page-item <?php if($pageno >= $total_pages){echo 'disabled';} ?>">
+                <a class="page-link" href="?pageno=<?php echo $pageno+1; ?>">Next</a>
+              </li>
+              <li class="page-item"> <a class="page-link" href="?pageno=<?php echo $total_pages ?>">Last</a> </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </section>
     <!-- /.content -->
 
-    <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Scroll to top">
-      <i class="fas fa-chevron-up"></i>
-    </a>
   </div>
   <!-- /.content-wrapper -->
 
   <footer class="main-footer" style="margin-left: 0px;">
     <div class="float-right d-none d-sm-block">
-      <b>Version</b> 3.2.0
+      <a class="btn btn-danger" href="logout.php">Logout</a>
     </div>
     <strong>Copyright &copy; 2024 <a href="#">RobotSixteen</a>.</strong> All rights reserved.
   </footer>

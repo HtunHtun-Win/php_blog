@@ -3,7 +3,7 @@
 	require 'config/config.php';
 	if($_POST){
 		$email = $_POST['email'];
-		$password = $_POST['password'];
+		$password = md5($_POST['password']);
     try{
       $sql = "SELECT * FROM users where email='$email'";
       $pdostatement = $pdo->prepare($sql);

@@ -93,8 +93,10 @@
             <!-- /.card -->
           </div>
         <?php endforeach; ?>
-        <div class="container-fluid">
-          <nav aria-label="Page navigation example" style="float:right;">
+      </div>
+          <!-- row -->
+        <div class="row" style="float:right;margin-left:0px;">
+          <nav aria-label="Page navigation example">
             <ul class="pagination">
               <li class="page-item"> <a class="page-link" href="?pageno=1">First</a> </li>
               <li class="page-item <?php if($pageno<=1){echo 'disabled';} ?>">
@@ -107,11 +109,9 @@
               <li class="page-item"> <a class="page-link" href="?pageno=<?php echo $total_pages ?>">Last</a> </li>
             </ul>
           </nav>
-        </div>
-      </div>
+        </div><br><br>
     </section>
     <!-- /.content -->
-
   </div>
   <!-- /.content-wrapper -->
 

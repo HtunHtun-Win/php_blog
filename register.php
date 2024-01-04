@@ -4,7 +4,7 @@
 	if($_POST){
     $name = $_POST['name'];
 		$email = $_POST['email'];
-		$password = $_POST['password'];
+		$password = md5($_POST['password']);
     try{
       //check duplicate
       $sql = "SELECT * FROM users where email='$email'";

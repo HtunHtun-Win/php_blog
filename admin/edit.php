@@ -1,46 +1,59 @@
 <?php
   session_start();
   require '../config/config.php';
+  require '../common/common.php';
   //check session
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
     header('location: /admin/login.php');
   }
-  if ($_GET) {
-    $id = $_GET['id'];
+  $id = $_GET['id'] ?? $_POST['id'];
+  if ($id) {
     $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE id=$id");
     $pdostatement->execute();
     $data = $pdostatement->fetch();
+  }else{
+    header("location: index.php");
   }
   if ($_POST) {
     $id = $_POST['id'];
     $title = $_POST['title'];
     $content = $_POST['content'];
-    //Have image or not
-    if (empty($_FILES['image']['name'])) {
-      $sql = "UPDATE posts set title=:title,content=:content WHERE id=:id";
-      $pdostatement = $pdo->prepare($sql);
-      $pdostatement->execute([
-        ':title' => $title,
-        ':content' => $content,
-        ':id' => $id,
-      ]);
-      echo "<script>alert('Post updated successfully!');window.location.href='index.php';</script>";
+    //check null
+    if (empty($title) || empty($content) ) {
+      if (empty($title)) {
+        $titleError = "Title can't be null!";
+      }
+      if (empty($content)) {
+        $contentError = "Content can't be null!";
+      }
     }else{
-      $image = "../images/".$_FILES['image']['name'];
-      $fileType = pathinfo($image,PATHINFO_EXTENSION);
-      if ( $fileType != 'png' && $fileType != 'jpg' && $fileType != 'jpeg' ) {
-        echo "<script>alert('Image must be png,jpg or jpeg!')</script>";
-      }else{
-        $sql = "UPDATE posts set title=:title,content=:content,image=:image WHERE id=:id";
-        move_uploaded_file($_FILES['image']['tmp_name'],$image);
+      //Have image or not
+      if (empty($_FILES['image']['name'])) {
+        $sql = "UPDATE posts set title=:title,content=:content WHERE id=:id";
         $pdostatement = $pdo->prepare($sql);
         $pdostatement->execute([
           ':title' => $title,
           ':content' => $content,
-          ':image' => $image,
           ':id' => $id,
         ]);
         echo "<script>alert('Post updated successfully!');window.location.href='index.php';</script>";
+      }else{
+        $image = "../images/".$_FILES['image']['name'];
+        $fileType = pathinfo($image,PATHINFO_EXTENSION);
+        if ( $fileType != 'png' && $fileType != 'jpg' && $fileType != 'jpeg' ) {
+          echo "<script>alert('Image must be png,jpg or jpeg!')</script>";
+        }else{
+          $sql = "UPDATE posts set title=:title,content=:content,image=:image WHERE id=:id";
+          move_uploaded_file($_FILES['image']['tmp_name'],$image);
+          $pdostatement = $pdo->prepare($sql);
+          $pdostatement->execute([
+            ':title' => $title,
+            ':content' => $content,
+            ':image' => $image,
+            ':id' => $id,
+          ]);
+          echo "<script>alert('Post updated successfully!');window.location.href='index.php';</script>";
+        }
       }
     }
   }
@@ -63,11 +76,15 @@
                   <input type="hidden" value="<?php echo $data['id'] ?>" name="id">
                   <div class="form-group">
                     <label>Title</label>
-                    <input type="text" name="title" class="form-control" value="<?php echo $data['title'] ?>" required>
+                     <span class="text-danger"><?php if($titleError) echo "*".$titleError; ?></span>
+                    <input type="text" name="title" class="form-control" value="<?php echo escape($data['title']) ?>">
                   </div>
                   <div class="form-group">
                     <label>Content</label>
-                    <textarea name="content" rows="7" class="form-control" required><?php echo $data['content'] ?></textarea>
+                    <span class="text-danger"><?php if($contentError) echo "*".$contentError; ?></span>
+                    <textarea name="content" rows="7" class="form-control"><?php
+                    echo escape($data['content'])
+                    ?></textarea>
                   </div>
                   <div class="form-group">
                     <label>Image</label><br>

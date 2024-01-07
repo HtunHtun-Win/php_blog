@@ -1,6 +1,7 @@
 <?php
   session_start();
   require '../config/config.php';
+  require '../common/common.php';
   $role = $_SESSION['user_role'];
   //check session
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
@@ -49,7 +50,6 @@
                   $results = $pdostatement->fetchAll();
                 }else{
                   $search = $_POST['search'];
-                  echo $search;
                   //Get Total Pages
                   $pdostatement = $pdo->prepare("SELECT * FROM posts WHERE title LIKE '%$search%' ORDER BY id DESC");
                   $pdostatement->execute();
@@ -77,11 +77,11 @@
                     <?php foreach($results as $result): ?>
                       <tr>
                         <td><?= $i ?></td>
-                        <td><?= $result['title'] ?></td>
+                        <td><?= escape($result['title']) ?></td>
                         <td>
                           <?php
-                            echo substr($result['content'], 0,100);
-                            if(strlen($result['content'])>100){
+                            echo substr(escape($result['content']), 0,100);
+                            if(strlen(escape($result['content']))>100){
                               echo ".......";
                             }
                           ?>

@@ -1,6 +1,7 @@
 <?php
   session_start();
   require '../config/config.php';
+  require '../common/common.php';
   $role = $_SESSION['user_role'];
   //check session
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
@@ -78,8 +79,8 @@
                     <?php foreach($results as $result): ?>
                       <tr>
                         <td><?= $i ?></td>
-                        <td><?= $result['name'] ?></td>
-                        <td><?= $result['email']  ?></td>
+                        <td><?= escape($result['name']) ?></td>
+                        <td><?= escape($result['email'])  ?></td>
                         <td>
                           <span class="badge bg-primary">
                             <?php

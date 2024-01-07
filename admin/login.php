@@ -1,6 +1,7 @@
 <?php
   session_start();
 	require '../config/config.php';
+  require '../common/common.php';
 	if($_POST){
 		$email = $_POST['email'];
 		$password = md5($_POST['password']);
@@ -64,6 +65,7 @@
       <p class="login-box-msg">Sign in to start your session</p>
 
       <form action="login.php" method="post">
+        <input type="hidden" name="csrf" value="<?= $_SESSION['token'] ?>">
         <div class="input-group mb-3">
           <input type="email" name="email" class="form-control" placeholder="Email" >
           <div class="input-group-append">

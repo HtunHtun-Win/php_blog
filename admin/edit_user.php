@@ -1,6 +1,7 @@
 <?php
   session_start();
   require '../config/config.php';
+  require '../common/common.php';
   $role = $_SESSION['user_role'];
   //check session
   if(empty($_SESSION['user_id']) and empty($_SESSION['logged_in'])){
@@ -25,14 +26,23 @@
                 $name = $_POST['name'];
                 $email = $_POST['email'];
                 $role = $_POST['role'] == 'admin' ? 1 : 0 ;
-                $updateSql = "UPDATE users SET name=:name,email=:email,role=:role WHERE id=$uid";
-                $pdostatement = $pdo->prepare($updateSql);
-                $pdostatement->execute([
-                  ':name' => $name,
-                  ':email' => $email,
-                  ':role' => $role
-                ]);
-                echo "<script>window.location.href='user_list.php'</script>";
+                if (empty($name) || empty($email)) {
+                  if(empty($name)){
+                    $nameError = "Name can't be null!";
+                  }
+                  if(empty($email)){
+                    $emailError = "Email can't be null!";
+                  }
+                }else{
+                  $updateSql = "UPDATE users SET name=:name,email=:email,role=:role WHERE id=$uid";
+                  $pdostatement = $pdo->prepare($updateSql);
+                  $pdostatement->execute([
+                    ':name' => $name,
+                    ':email' => $email,
+                    ':role' => $role
+                  ]);
+                  echo "<script>window.location.href='user_list.php'</script>";
+                }
               }
               $getSql = "SELECT * FROM users WHERE id=$uid";
               $pdostatement = $pdo->prepare($getSql);
@@ -54,11 +64,13 @@
                 <div class="card-body">
                   <div class="form-group">
                     <label>Name</label>
-                    <input type="text" name="name" class="form-control" value="<?= $user['name'] ?>" required>
+                    <span class="text-danger"><?php if($nameError) echo "*".$nameError; ?></span>
+                    <input type="text" name="name" class="form-control" value="<?= escape($user['name']) ?>" >
                   </div>
                   <div class="from-group">
                     <label>Email</label>
-                    <input type="text" name="email" class="form-control" value="<?= $user['email'] ?>" required>
+                    <span class="text-danger"><?php if($emailError) echo "*".$emailError; ?></span>
+                    <input type="text" name="email" class="form-control" value="<?= escape($user['email']) ?>" >
                   </div>
                   <div class="form-group mt-3">
                     <label>Role</label>

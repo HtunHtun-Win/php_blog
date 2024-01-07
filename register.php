@@ -4,28 +4,43 @@
 	if($_POST){
     $name = $_POST['name'];
 		$email = $_POST['email'];
-		$password = md5($_POST['password']);
-    try{
-      //check duplicate
-      $sql = "SELECT * FROM users where email='$email'";
-      $pdostatement = $pdo->prepare($sql);
-      $pdostatement->execute();
-      $result = $pdostatement->fetch();
-      //
-      if ($result['email']) {
-        $_SESSION['error'] = "error";
-      }else{
-        $sql = "INSERT INTO users(name,password,email,role) VALUES(:name,:password,:email,0)";
-        $pdostatement = $pdo->prepare($sql);
-        $pdostatement->execute([
-          ':name' => $name,
-          ':password' => $password,
-          ':email' => $email,
-        ]);
-        echo "<script>alert('Account creaded successfully.');window.location.href='index.php'</script>";
+		$password = $_POST['password'];
+    if (empty($name) || empty($email) || empty($password) || strlen($password) < 4) {
+      if (empty($name)) {
+        $nameError = "Name can't be null!";
       }
-    }catch(Exception $e){
-      echo $e->getMessage();
+      if (empty($email)) {
+        $emailError = "Email can't be null!";
+      }
+      if (empty($password)) {
+        $passwordError = "Password can't be null!";
+      }elseif (strlen($password) < 4) {
+        $passwordError = "Password must be 4 characters at least!";
+      }
+    }else{
+      try{
+      //check duplicate
+        $password = md5($password);
+        $sql = "SELECT * FROM users where email='$email'";
+        $pdostatement = $pdo->prepare($sql);
+        $pdostatement->execute();
+        $result = $pdostatement->fetch();
+        //
+        if ($result['email']) {
+          $_SESSION['error'] = "error";
+        }else{
+          $sql = "INSERT INTO users(name,password,email,role) VALUES(:name,:password,:email,0)";
+          $pdostatement = $pdo->prepare($sql);
+          $pdostatement->execute([
+            ':name' => $name,
+            ':password' => $password,
+            ':email' => $email,
+          ]);
+          echo "<script>alert('Account creaded successfully.');window.location.href='index.php'</script>";
+        }
+      }catch(Exception $e){
+        echo $e->getMessage();
+      }
     }
 	}
  ?>
@@ -65,6 +80,7 @@
       <p class="login-box-msg">Create New Account</p>
 
       <form action="register.php" method="post">
+        <span class="text-danger"><?php if($nameError) echo $nameError; ?></span>
         <div class="input-group mb-3">
           <input type="text" name="name" class="form-control" placeholder="Name" required>
           <div class="input-group-append">
@@ -73,6 +89,7 @@
             </div>
           </div>
         </div>
+        <span class="text-danger"><?php if($emailError) echo $emailError; ?></span>
         <div class="input-group mb-3">
           <input type="email" name="email" class="form-control" placeholder="Email" required>
           <div class="input-group-append">
@@ -81,6 +98,7 @@
             </div>
           </div>
         </div>
+        <span class="text-danger"><?php if($passwordError) echo $passwordError; ?></span>
         <div class="input-group mb-3">
           <input type="password" name="password" class="form-control" placeholder="Password" required>
           <div class="input-group-append">
